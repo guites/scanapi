@@ -4,7 +4,7 @@ import yaml
 from click.testing import CliRunner
 from pytest import mark
 
-from scanapi.cli import run
+from scanapi.cli import run, convert
 
 log = logging.getLogger(__name__)
 runner = CliRunner()
@@ -55,3 +55,16 @@ class TestRun:
             "Error loading configuration file.\nPyYAML: error foo"
             in caplog.text
         )
+
+
+@mark.describe("main")
+@mark.describe("convert")
+class TestConvert:
+    def test_should_call_openapi_to_yaml(self, mocker):
+        runner = CliRunner()
+        mock_openapi_to_yaml = mocker.patch("scanapi.cli.openapi_to_yaml")
+        result = runner.invoke(convert, "tests/data/openapi.json")
+
+        assert result.exit_code == 0
+
+        mock_openapi_to_yaml.assert_called_once_with("tests/data/openapi.json")
